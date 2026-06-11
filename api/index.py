@@ -63,10 +63,20 @@ class handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
+    def _redirect(self, location: str, status: int = 307) -> None:
+        self.send_response(status)
+        self.send_header("Location", location)
+        self.end_headers()
+
     def do_GET(self):
         path = urlparse(self.path).path
+        # Python 框架会把 / 路由到本函数，静态 index 在 /index.html
+        if path in ("/", ""):
+            return self._redirect("/index.html")
         if path in ("/api/health", "/api"):
             return self._send_json(health())
+        if not path.startswith("/api/"):
+            return self._redirect("/index.html")
         return self._send_json({"error": "not found"}, 404)
 
     def do_POST(self):
