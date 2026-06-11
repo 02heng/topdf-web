@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TO PDF · 批注预览</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png" />
+  <link rel="stylesheet" href="viewer.css" />
+  <script src="pdf.min.js"></script>
+</head>
+<body>
+  <div class="toolbar">
+    <img class="toolbar-brand" src="brand-logo.png" width="32" height="32" alt="TO PDF" />
+    <button id="btn-prev">上一页</button>
+    <span id="page-label">0 / 0</span>
+    <button id="btn-next">下一页</button>
+    <button id="btn-refresh">刷新</button>
+    <button id="btn-tools" type="button" class="toolbar-tools-btn" title="演示工具">演示工具</button>
+    <div class="toolbar-zoom" title="页面缩放（Ctrl+滚轮）">
+      <button id="btn-zoom-out" type="button" aria-label="缩小">−</button>
+      <span id="zoom-label">100%</span>
+      <button id="btn-zoom-in" type="button" aria-label="放大">+</button>
+      <button id="btn-zoom-reset" type="button" title="重置为默认大小">重置</button>
+    </div>
+    <span class="toolbar-spacer" aria-hidden="true"></span>
+    <span id="status">加载中...</span>
+  </div>
+
+  <aside id="tools-panel" class="tools-panel hidden" aria-label="演示工具">
+    <div class="tools-panel-title">演示工具</div>
+    <ul class="tools-list" role="listbox">
+      <li><button type="button" class="tool-item active" data-tool="pointer">🖱️ 指针</button></li>
+      <li><button type="button" class="tool-item" data-tool="laser">🔴 激光笔</button></li>
+      <li><button type="button" class="tool-item" data-tool="pen">✏️ 笔</button></li>
+      <li><button type="button" class="tool-item" data-tool="highlighter">🖍️ 荧光笔</button></li>
+      <li><button type="button" class="tool-item" data-tool="eraser">🧽 橡皮擦</button></li>
+      <li><button type="button" class="tool-item tool-item-muted" data-tool="clear" id="btn-clear-ink">清除本页墨迹</button></li>
+    </ul>
+    <div class="tools-colors" id="color-palette" aria-label="墨迹颜色"></div>
+    <p class="tools-hint">笔/荧光笔可保存到 PDF；激光笔为临时指示不会写入文件。缩放请用工具栏 +/− 或 Ctrl+滚轮。Ctrl+Z 撤销笔迹/橡皮擦/清除本页墨迹。</p>
+  </aside>
+
+  <div id="viewer-wrap">
+    <div id="page-viewport">
+      <div id="visible-area-guide" hidden aria-hidden="true"></div>
+    <div id="page-container">
+      <canvas id="pdf-canvas"></canvas>
+      <canvas id="ink-canvas"></canvas>
+      <canvas id="laser-canvas"></canvas>
+      <div id="focus-layer"></div>
+      <div id="annotation-layer"></div>
+    </div>
+    </div>
+  </div>
+  <script src="web-bridge.js"></script>
+  <script src="viewer.js"></script>
+</body>
+</html>

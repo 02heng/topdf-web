@@ -1,0 +1,449 @@
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: #c4b5fd #ede9fe;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif;
+  background: linear-gradient(165deg, #f4f0fa 0%, #ede9fe 38%, #ffffff 72%);
+  color: #1e1633;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 淡紫圆角滚动条（Web 预览与工具面板） */
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #ede9fe;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #c4b5fd;
+  border-radius: 10px;
+  border: 2px solid #ede9fe;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #a78bfa;
+}
+
+*::-webkit-scrollbar-corner {
+  background: #ede9fe;
+}
+
+.toolbar-brand {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  background: linear-gradient(105deg, #a78bfa 0%, #7c3aed 42%, #5b21b6 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 20px rgba(91, 33, 182, 0.28);
+  flex-shrink: 0;
+}
+
+.toolbar button {
+  background: rgba(255, 255, 255, 0.96);
+  color: #5b21b6;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 4px rgba(30, 22, 51, 0.08);
+}
+
+.toolbar button:hover {
+  background: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.2);
+}
+
+.toolbar-tools-btn.active {
+  background: #ede9fe;
+  box-shadow: inset 0 0 0 2px #7c3aed;
+}
+
+.toolbar-zoom {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.toolbar-zoom button {
+  min-width: 32px;
+  padding: 6px 10px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.toolbar-zoom #btn-zoom-reset {
+  font-size: 12px;
+  padding: 6px 8px;
+  min-width: auto;
+}
+
+#zoom-label {
+  min-width: 48px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  user-select: none;
+}
+
+.toolbar-spacer {
+  flex: 1;
+  min-width: 8px;
+}
+
+.toolbar-save-ink-btn {
+  background: rgba(255, 255, 255, 0.96) !important;
+  color: #5b21b6 !important;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(30, 22, 51, 0.08);
+}
+
+.toolbar-save-ink-btn:hover {
+  background: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.tool-item-save {
+  color: #5b21b6;
+  font-weight: 600;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+  padding-top: 12px !important;
+}
+
+.toolbar span {
+  font-size: 14px;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+#status {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  flex: 1;
+  text-align: right;
+  min-width: 0;
+}
+
+#page-label {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* —— 演示工具侧栏（参考 PPT 放映墨迹菜单） —— */
+.tools-panel {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  width: 220px;
+  background: #ffffff;
+  border: 2px solid #e11d48;
+  border-radius: 4px;
+  box-shadow: 0 12px 36px rgba(30, 22, 51, 0.18);
+  z-index: 100;
+  padding: 8px 0 12px;
+}
+
+.tools-panel.hidden {
+  display: none;
+}
+
+.tools-panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 6px 14px 8px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tools-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+
+.tool-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #1e1633;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.tool-item:hover {
+  background: #f4f0fa;
+}
+
+.tool-item.active {
+  background: #ede9fe;
+  color: #5b21b6;
+  font-weight: 600;
+}
+
+.tool-item-muted {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.tools-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px 4px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.color-swatch.selected {
+  border-color: #64748b;
+  box-shadow: 0 0 0 1px #fff inset;
+}
+
+.color-swatch[data-color="#ffffff"] {
+  box-shadow: inset 0 0 0 1px #cbd5e1;
+}
+
+.tools-hint {
+  margin: 8px 14px 0;
+  font-size: 11px;
+  color: #7c7194;
+  line-height: 1.45;
+}
+
+#viewer-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px;
+  background: linear-gradient(180deg, #faf8ff 0%, #f4f0fa 50%, #ffffff 100%);
+}
+
+#viewer-wrap.mode-laser {
+  cursor: none;
+}
+
+#viewer-wrap.mode-pen,
+#viewer-wrap.mode-highlighter {
+  cursor: crosshair;
+}
+
+#viewer-wrap.mode-eraser {
+  cursor: cell;
+}
+
+/* 视口固定为基准尺寸，内部高清重绘 + 平移，避免 CSS scale 模糊 */
+#page-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(109, 40, 217, 0.15);
+  background: #fff;
+}
+
+#page-container {
+  position: relative;
+  border-radius: 8px;
+  will-change: transform;
+}
+
+#page-container.page-magnify-smooth {
+  transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.35, 1);
+}
+
+#page-container.page-magnify-smooth #pdf-canvas {
+  filter: blur(0.6px);
+  transition: filter 0.22s cubic-bezier(0.2, 0.9, 0.35, 1);
+}
+
+#page-container.page-magnify-sharp {
+  transition: none;
+}
+
+#page-container.page-magnify-sharp #pdf-canvas {
+  filter: none;
+}
+
+#pdf-canvas {
+  display: block;
+  background: #fff;
+  border-radius: 4px;
+}
+
+#ink-canvas,
+#laser-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+
+#ink-canvas.interactive {
+  pointer-events: auto;
+  cursor: inherit;
+}
+
+#focus-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 5;
+}
+
+#annotation-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: visible;
+}
+
+/* 预览窗口内当前可见范围（非批注框）；虚线外内容需滚动才可能看到 */
+#visible-area-guide {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px dashed rgba(91, 33, 182, 0.45);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.annot-inline {
+  position: absolute;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #7c2d12;
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: none;
+  z-index: 8;
+  text-shadow: 0 0 3px #fff, 0 0 6px #fff;
+}
+
+.annot-inline.vertical {
+  white-space: nowrap;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.annot-marker {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  overflow: visible;
+  border: 2px solid #7c3aed;
+  background: linear-gradient(145deg, #ffffff, #ede9fe);
+  border-radius: 8px;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #5b21b6;
+  z-index: 10;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.annot-marker:hover,
+.annot-marker.active {
+  transform: scale(1.06);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.32);
+  z-index: 20;
+}
+
+.annot-popup {
+  display: none;
+  position: absolute;
+  left: 30px;
+  top: 0;
+  min-width: 280px;
+  max-width: 380px;
+  max-height: 340px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%);
+  border: 1px solid #e8e0f5;
+  border-left: 3px solid #8b5cf6;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #1e1633;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 12px 32px rgba(91, 33, 182, 0.18);
+  z-index: 30;
+}
+
+.annot-marker.active .annot-popup {
+  display: block;
+}
+
+.annot-popup-title {
+  font-weight: 700;
+  color: #7c3aed;
+  margin-bottom: 8px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}

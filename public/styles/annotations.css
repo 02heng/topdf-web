@@ -1,0 +1,164 @@
+/* ── 批注标记 ── */
+.annot-marker {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--purple-700);
+  background: linear-gradient(145deg, #ffffff, var(--purple-100));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: grab;
+  pointer-events: auto;
+  z-index: 10;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.annot-marker:hover,
+.annot-marker.active {
+  transform: scale(1.06);
+  box-shadow: 0 6px 16px rgba(124, 58, 237, 0.32);
+  z-index: 20;
+}
+
+/* ── 弹层 ── */
+.annot-popup {
+  display: none;
+  position: absolute;
+  left: 28px;
+  top: 0;
+  min-width: 280px;
+  max-width: 380px;
+  max-height: 420px;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #faf8ff 100%);
+  border: 2px solid var(--purple-700);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.05), 0 12px 32px rgba(91, 33, 182, 0.18);
+  z-index: 30;
+  pointer-events: auto;
+}
+
+.annot-marker.active .annot-popup { display: block; }
+
+.annot-popup__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.annot-popup__title {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.annot-popup__close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--purple-100);
+  color: var(--purple-800);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.annot-popup__close:hover { background: var(--purple-200); }
+
+.annot-popup__body {
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── 原位译文 ── */
+.annot-inline {
+  position: absolute;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 600;
+  white-space: pre-wrap;
+  word-break: break-word;
+  pointer-events: auto;
+  cursor: move;
+  z-index: 8;
+  text-shadow: 0 0 3px #fff, 0 0 6px #fff;
+  transition: opacity 0.12s;
+}
+
+.annot-inline.selected {
+  outline: 2px solid var(--purple-600);
+  outline-offset: 0px;
+}
+
+/* ── 缩放手柄 ── */
+.annot-resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fff;
+  border: 2px solid var(--purple-600);
+  border-radius: 2px;
+  z-index: 12;
+  pointer-events: auto;
+}
+.annot-resize-handle--nw { top: -4px; left: -4px; cursor: nw-resize; }
+.annot-resize-handle--n  { top: -4px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+.annot-resize-handle--ne { top: -4px; right: -4px; cursor: ne-resize; }
+.annot-resize-handle--e  { top: 50%; right: -4px; transform: translateY(-50%); cursor: e-resize; }
+.annot-resize-handle--se { bottom: -4px; right: -4px; cursor: se-resize; }
+.annot-resize-handle--s  { bottom: -4px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+.annot-resize-handle--sw { bottom: -4px; left: -4px; cursor: sw-resize; }
+.annot-resize-handle--w  { top: 50%; left: -4px; transform: translateY(-50%); cursor: w-resize; }
+
+.annot-inline.vertical {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ── 原位编辑浮层 ── */
+.inline-editor {
+  position: absolute;
+  background: #FFFFFF;
+  border: 2px solid var(--purple-700);
+  border-radius: 6px;
+  z-index: 50;
+  box-shadow: 0 8px 24px rgba(91, 33, 182, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inline-editor__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--purple-50);
+  padding: 3px 6px;
+  flex-shrink: 0;
+}
+
+.inline-editor__textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 4px 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  resize: none;
+  background: #fff;
+  color: var(--text);
+}

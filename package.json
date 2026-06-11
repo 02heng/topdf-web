@@ -1,0 +1,12 @@
+{
+  "name": "topdf-web",
+  "version": "1.0.0",
+  "description": "TO PDF · 中文批注 — Web Edition (Vercel)",
+  "private": true,
+  "scripts": {
+    "dev": "python scripts/local_dev.py",
+    "vercel-dev": "vercel dev"
+  },
+  "keywords": ["pdf", "annotation", "vercel"],
+  "license": "MIT"
+}

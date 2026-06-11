@@ -1,0 +1,66 @@
+.ink-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  margin-top: 6px;
+}
+
+.ink-toolbar__label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.ink-tool-btn {
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--purple-800);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.ink-tool-btn:hover { background: var(--purple-50); }
+
+.ink-tool-btn.active {
+  background: var(--brand);
+  color: var(--text-on-purple);
+  border-color: var(--brand);
+}
+
+.ink-tool--danger {
+  background: var(--purple-100);
+  color: var(--purple-900);
+  border-color: var(--purple-400);
+}
+
+.ink-tool--danger:hover { background: var(--purple-200); }
+
+.ink-toolbar__spacer { flex: 1; }
+
+.ink-colors {
+  display: flex;
+  gap: 4px;
+}
+
+.ink-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s;
+}
+
+.ink-color-swatch:hover { transform: scale(1.15); }
+.ink-color-swatch.active { border-color: var(--text); }

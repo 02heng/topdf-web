@@ -1,0 +1,49 @@
+.status-bar {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 0 var(--pad) var(--pad);
+  padding: 0 var(--pad);
+  flex-shrink: 0;
+}
+
+.status-bar__message {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-bar__progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar {
+  width: 220px;
+  height: 10px;
+  background: var(--purple-100);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: var(--purple-700);
+  border-radius: 5px;
+  width: 0;
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  font-size: 12px;
+  color: var(--purple-800);
+  min-width: 56px;
+  text-align: right;
+}

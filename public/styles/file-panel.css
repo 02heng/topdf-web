@@ -1,0 +1,67 @@
+.file-list {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--purple-50);
+  border-radius: var(--radius);
+  padding: var(--pad-sm);
+  margin-top: var(--pad-sm);
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 3px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  gap: 4px;
+}
+
+.file-item:hover {
+  background: var(--purple-50);
+}
+
+.file-item.active {
+  background: var(--purple-100);
+  border: 1px solid var(--purple-400);
+}
+
+.file-item__name {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-item.active .file-item__name {
+  color: var(--purple-800);
+  font-weight: 500;
+}
+
+.file-item__remove {
+  width: 30px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--purple-100);
+  color: var(--purple-800);
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.file-item:hover .file-item__remove { opacity: 1; }
+.file-item__remove:hover { background: var(--purple-200); }
+
+.file-hint {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: var(--pad);
+}

@@ -1,0 +1,70 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--pad-sm);
+  height: 58px;
+  padding: 0 var(--pad);
+  background: linear-gradient(180deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+  border-radius: var(--radius-lg);
+  margin: var(--pad) var(--pad) var(--pad-sm);
+  flex-shrink: 0;
+}
+
+.toolbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.toolbar__title {
+  color: var(--text-on-purple);
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.toolbar__divider {
+  width: 1px;
+  height: 28px;
+  background: #9F7AEA;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+.toolbar__btn {
+  height: var(--btn-height);
+  padding: 0 16px;
+  border: 1px solid #EDE9FE;
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 600;
+  background: #6D28D9;
+  color: var(--text-on-purple);
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.toolbar__btn:hover {
+  background: #7C3AED;
+}
+
+.toolbar__btn--primary {
+  background: #FFFFFF;
+  color: #5B21B6;
+  border-color: #DDD6FE;
+}
+
+.toolbar__btn--primary:hover {
+  background: #F5F3FF;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(91, 33, 182, 0.2);
+}
+
+.toolbar__spacer { flex: 1; }

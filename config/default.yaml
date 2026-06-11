@@ -1,0 +1,36 @@
+annotation:
+  detail_level: detailed
+  mode: sidebar
+  style:
+    background: '#FFFFCC'
+    color: '#333333'
+    font_family: Microsoft YaHei
+    font_size: 12
+app:
+  auto_save: true
+  language: zh-CN
+  recent_files_limit: 10
+  theme: system
+llm:
+  deepseek:
+    api_key: ''  # 在这里填入您的 DeepSeek API Key
+    base_url: https://api.deepseek.com
+    max_tokens: 4096
+    model: deepseek-v4-pro
+    temperature: 0.3
+  ollama:
+    base_url: http://localhost:11434
+    model: llama3:70b
+    temperature: 0.3
+  openai:
+    api_key: ''
+    max_tokens: 4096
+    model: gpt-4o
+    temperature: 0.3
+  agnes:
+    api_key: ''
+    base_url: https://apihub.agnes-ai.com/v1
+    max_tokens: 4096
+    model: agnes-2.0-flash
+    temperature: 0.3
+  provider: deepseek

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/x-icon" href="assets/icon.ico" />
+  <link rel="icon" type="image/png" sizes="256x256" href="assets/icon.png" />
+  <link rel="stylesheet" href="styles/theme.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/toolbar.css" />
+  <link rel="stylesheet" href="styles/file-panel.css" />
+  <link rel="stylesheet" href="styles/preview.css" />
+  <link rel="stylesheet" href="styles/sidebar.css" />
+  <link rel="stylesheet" href="styles/annotations.css" />
+  <link rel="stylesheet" href="styles/ink-toolbar.css" />
+  <link rel="stylesheet" href="styles/dialogs.css" />
+  <link rel="stylesheet" href="styles/status-bar.css" />
+</head>
+<body>
+  <header class="toolbar" id="toolbar">
+    <div class="toolbar__brand">
+      <img class="toolbar__logo" src="assets/toolbar-logo.png" width="32" height="32" alt="TO PDF" />
+      <span class="toolbar__title">TO PDF · 中文批注</span>
+    </div>
+    <div class="toolbar__divider"></div>
+
+    <button class="toolbar__btn toolbar__btn--primary" id="btn-import">导入</button>
+    <button class="toolbar__btn" id="btn-open-project">打开工程</button>
+    <button class="toolbar__btn" id="btn-save-project">保存工程</button>
+    <div class="toolbar__divider"></div>
+
+    <button class="toolbar__btn toolbar__btn--primary" id="btn-annotate">开始批注</button>
+    <button class="toolbar__btn" id="btn-annotate-all">全部批注</button>
+    <div class="toolbar__divider"></div>
+
+    <button class="toolbar__btn" id="btn-export">导出</button>
+    <button class="toolbar__btn" id="btn-preview">放映</button>
+
+    <span class="toolbar__spacer"></span>
+    <button class="toolbar__btn toolbar__btn--primary" id="btn-settings">系统 API 设置</button>
+  </header>
+
+  <input type="file" id="file-input" accept=".pdf,.ppt,.pptx,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation" multiple hidden />
+  <input type="file" id="project-input" accept=".topdf,.json,application/json" hidden />
+
+  <main class="content">
+    <aside class="panel panel--files" id="file-panel">
+      <div class="section-header">
+        <span class="section-header__accent"></span>
+        <span class="section-header__text">文件列表</span>
+      </div>
+      <div class="file-list" id="file-list"></div>
+      <p class="file-hint" id="file-hint">点击顶部「导入」添加 PDF / PPT</p>
+    </aside>
+
+    <section class="panel panel--preview" id="preview-panel">
+      <div class="preview-placeholder" id="preview-placeholder">
+        导入 PDF / PPT 后，文档将显示在此处
+      </div>
+
+      <div class="preview-viewer" id="preview-viewer" style="display:none">
+        <div class="canvas-wrap" id="canvas-wrap">
+          <canvas id="pdf-canvas"></canvas>
+          <canvas id="ink-canvas"></canvas>
+          <div class="annotation-layer" id="annotation-layer"></div>
+        </div>
+      </div>
+
+      <div class="ink-toolbar" id="ink-toolbar" style="display:none">
+        <span class="ink-toolbar__label">绘图</span>
+        <button class="ink-tool-btn" id="ink-pen" data-tool="pen">笔</button>
+        <button class="ink-tool-btn" id="ink-highlighter" data-tool="highlighter">荧光笔</button>
+        <button class="ink-tool-btn" id="ink-eraser" data-tool="eraser">橡皮</button>
+        <button class="ink-tool-btn ink-tool--danger" id="btn-clear-ink">清除本页</button>
+        <button class="ink-tool-btn" id="ink-close">关闭</button>
+        <span class="ink-toolbar__spacer"></span>
+        <div class="ink-colors" id="ink-colors"></div>
+      </div>
+
+      <nav class="nav-bar" id="nav-bar" style="display:none">
+        <div class="nav-bar__zoom">
+          <button class="nav-btn" id="btn-zoom-out">−</button>
+          <span class="nav-bar__zoom-label" id="zoom-label">100%</span>
+          <button class="nav-btn" id="btn-zoom-in">+</button>
+        </div>
+        <button class="nav-btn" id="btn-prev-page">上一页</button>
+        <span class="nav-bar__page-label" id="page-label">0 / 0</span>
+        <button class="nav-btn" id="btn-next-page">下一页</button>
+      </nav>
+    </section>
+
+    <aside class="panel panel--sidebar" id="sidebar-panel">
+      <div class="sidebar-card" id="sidebar-card">
+        <div class="sidebar-card__header">
+          <div class="section-header">
+            <span class="section-header__accent"></span>
+            <span class="section-header__text">批注管理</span>
+          </div>
+          <div class="sidebar-card__actions">
+            <button class="btn btn--soft-danger btn--sm" id="btn-delete-all">删除全部</button>
+            <select class="select--preset" id="preset-select">
+              <option value="inline">原位译文</option>
+              <option value="marker">标记批注</option>
+              <option value="term">术语注释</option>
+              <option value="emphasis">重点提示</option>
+              <option value="note">补充说明</option>
+              <option value="custom">当前样式</option>
+            </select>
+            <button class="btn btn--primary btn--sm" id="btn-add-annotation">+ 添加</button>
+          </div>
+        </div>
+
+        <div class="annotation-list" id="annotation-list"></div>
+
+        <div class="section-header" style="margin-top:8px">
+          <span class="section-header__accent"></span>
+          <span class="section-header__text">批注内容</span>
+        </div>
+
+        <div class="style-panel">
+          <div class="style-row">
+            <label class="style-label">字体</label>
+            <select class="style-select" id="font-family-select"></select>
+          </div>
+          <div class="style-row">
+            <label class="style-label">字号</label>
+            <input type="number" class="style-input" id="font-size-input" value="12" min="6" max="96" />
+            <span class="style-unit">pt</span>
+          </div>
+          <div class="style-row style-row--orientation">
+            <label class="style-label">方向</label>
+            <div class="segmented segmented--sidebar" id="orientation-segment">
+              <button type="button" class="segmented__btn active" data-value="horizontal">横向</button>
+              <button type="button" class="segmented__btn" data-value="vertical">纵向</button>
+            </div>
+          </div>
+          <div class="style-row style-row--color">
+            <label class="style-label">颜色</label>
+            <div class="color-row__main">
+              <div class="color-swatches" id="color-swatches"></div>
+              <button type="button" class="color-picker-btn" id="btn-color-picker" title="打开调色盘">调色盘</button>
+            </div>
+          </div>
+        </div>
+
+        <textarea class="annotation-editor" id="annotation-editor" placeholder="选择批注后在此编辑内容..."></textarea>
+
+        <div class="sidebar-card__footer">
+          <span class="sidebar-auto-save-hint">修改后自动保存</span>
+          <button class="btn btn--soft-danger" id="btn-delete-annotation">删除</button>
+        </div>
+      </div>
+
+      <p class="mode-hint" id="mode-hint">滚轮滚动 · ± 缩放 · 双击译文编辑 · 可拖动微调位置</p>
+    </aside>
+  </main>
+
+  <footer class="status-bar" id="status-bar">
+    <span class="status-bar__message" id="status-message">就绪</span>
+    <div class="status-bar__progress">
+      <div class="progress-bar" id="progress-bar">
+        <div class="progress-bar__fill" id="progress-fill"></div>
+      </div>
+      <span class="progress-label" id="progress-label"></span>
+    </div>
+  </footer>
+
+  <div class="dialog-overlay" id="settings-overlay" style="display:none">
+    <div class="dialog dialog--settings" id="settings-dialog"></div>
+  </div>
+
+  <div class="dialog-overlay" id="message-overlay" style="display:none">
+    <div class="dialog dialog--message" id="message-dialog"></div>
+  </div>
+
+  <div class="dialog-overlay" id="page-range-overlay" style="display:none">
+    <div class="dialog dialog--page-range" id="page-range-dialog"></div>
+  </div>
+
+  <script src="services/file-store.js"></script>
+  <script src="services/web-session.js"></script>
+  <script src="services/state.js"></script>
+  <script src="services/api-client.js"></script>
+  <script src="components/dialogs.js"></script>
+  <script src="components/toolbar.js"></script>
+  <script src="components/file-panel.js"></script>
+  <script src="components/preview.js"></script>
+  <script src="components/ink-engine.js"></script>
+  <script src="components/annotations.js"></script>
+  <script src="components/sidebar.js"></script>
+  <script src="components/ink-toolbar.js"></script>
+  <script src="components/status-bar.js"></script>
+  <script src="components/settings-dialog.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
