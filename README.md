@@ -30,7 +30,7 @@
 cd "E:\desktop\To PDF Web"
 python -m venv .venv
 .venv\Scripts\activate        # Windows
-pip install -r requirements.txt
+pip install -r requirements-full.txt
 ```
 
 ### 2. 启动开发服务器
@@ -84,7 +84,8 @@ git push -u origin main
 ### Vercel 注意事项
 
 - **函数超时**：Hobby 计划约 10s，Pro 可配置 60s（`vercel.json` 已设 `maxDuration: 60`）。批量批注在 Web 版改为**前端逐页调用**，避免单次超时。
-- **依赖体积**：PyMuPDF + CrewAI 较大，首次冷启动可能较慢。
+- **依赖体积**：Vercel 使用精简版 `requirements.txt`（不含 CrewAI），避免超过 500MB 限制；单模型批注/原位译文可用。本地完整功能请 `pip install -r requirements-full.txt`。
+- **冷启动**：PyMuPDF 较大，首次调用可能较慢。
 - **Ollama**：本地 Ollama 在纯 Web 部署中不可用（无 localhost 访问）。
 
 ## 项目结构

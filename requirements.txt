@@ -1,8 +1,7 @@
+# Vercel 部署用（须 < 500MB）。多智能体 CrewAI 见 requirements-full.txt
 PyMuPDF>=1.23.0
 python-pptx>=0.6.21
 openai>=1.0.0
 pydantic>=2.0.0
 pyyaml>=6.0
 Pillow>=10.0.0
-liteparse>=2.0.0
-crewai>=1.14.0

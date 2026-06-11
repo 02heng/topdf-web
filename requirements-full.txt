@@ -1,0 +1,4 @@
+# 本地完整依赖（含 CrewAI / LiteParse，体积较大，勿用于 Vercel）
+-r requirements.txt
+liteparse>=2.0.0
+crewai>=1.14.0
