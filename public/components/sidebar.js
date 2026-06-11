@@ -92,7 +92,7 @@ const Sidebar = (() => {
     if (state?.annotations) {
       AppState.state.annotationsByPage = state.annotations;
     }
-    window.electronAPI?.refreshPreview?.();
+    window.refreshPreview?.();
     return state;
   }
 

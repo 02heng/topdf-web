@@ -68,7 +68,7 @@ const FilePanel = (() => {
       const files = AppState.get('selectedFiles');
       const name = files[index]?.split(/[\\/]/).pop() || '';
       StatusBar.setMessage(`已选择: ${name}`);
-      window.electronAPI?.refreshPreview?.();
+      window.refreshPreview?.();
     } catch (e) {
       StatusBar.setMessage(`选择文件失败: ${e.message}`);
     }

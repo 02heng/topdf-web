@@ -384,7 +384,7 @@ const Annotations = (() => {
 
     refresh();
     Sidebar.refreshList();
-    window.electronAPI?.refreshPreview?.();
+    window.refreshPreview?.();
   }
 
 

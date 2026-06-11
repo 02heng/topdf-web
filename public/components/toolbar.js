@@ -206,7 +206,7 @@ const Toolbar = (() => {
             AppState.state.annotationsByPage = state.annotations || {};
             Annotations.refresh();
             Sidebar.refreshList();
-            window.electronAPI?.refreshPreview?.();
+            window.refreshPreview?.();
           }
 
           if (prog.status === 'done') {
@@ -214,7 +214,7 @@ const Toolbar = (() => {
             AppState.state.annotationsByPage = state.annotations || {};
             Annotations.refresh();
             Sidebar.refreshList();
-            window.electronAPI?.refreshPreview?.();
+            window.refreshPreview?.();
             StatusBar.setProgress(jobTotal, jobTotal, '完成');
             StatusBar.setMessage(prog.message || `批注完成：第 ${startPage}–${endPage} 页`);
             break;
@@ -318,8 +318,12 @@ const Toolbar = (() => {
       if (window.electronAPI?.openPreview) {
         window.electronAPI.openPreview();
       } else {
+        const f = WebSession.currentFile();
+        if (!f?.id) throw new Error('当前文件无效，请重新导入 PDF');
         await WebSession.savePreviewBridge();
-        window.open(`/preview/?t=${Date.now()}`, '_blank');
+        window._topdfPreviewPdfId = f.id;
+        const q = new URLSearchParams({ fileId: f.id, t: String(Date.now()) });
+        window.open(`/preview/?${q}`, '_blank', 'noopener');
       }
       StatusBar.setMessage('上课模式已打开');
     } catch (e) {

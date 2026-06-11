@@ -5,6 +5,7 @@ const FileStore = (() => {
   const DB_NAME = 'topdf-web';
   const DB_VERSION = 1;
   const STORE = 'files';
+  const PREVIEW_ID = '__topdf_preview__';
   let dbPromise = null;
 
   function openDb() {
@@ -72,10 +73,39 @@ const FileStore = (() => {
     return record;
   }
 
+  function toArrayBuffer(pdfBytes) {
+    if (!pdfBytes) throw new Error('PDF 不可用');
+    if (pdfBytes instanceof ArrayBuffer) return pdfBytes;
+    if (ArrayBuffer.isView(pdfBytes)) {
+      const view = new Uint8Array(pdfBytes.buffer, pdfBytes.byteOffset, pdfBytes.byteLength);
+      return view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength);
+    }
+    throw new Error('PDF 不可用');
+  }
+
   async function getPdfArrayBuffer(fileId) {
     const rec = await get(fileId);
     if (!rec?.pdfBytes) throw new Error('PDF 不可用');
-    return rec.pdfBytes instanceof ArrayBuffer ? rec.pdfBytes : rec.pdfBytes.buffer;
+    return toArrayBuffer(rec.pdfBytes);
+  }
+
+  async function syncPreviewFromFile(fileId) {
+    const rec = await get(fileId);
+    if (!rec?.pdfBytes) throw new Error('PDF 不可用');
+    await put({
+      id: PREVIEW_ID,
+      name: rec.name || 'preview',
+      mime: 'application/pdf',
+      pdfBytes: rec.pdfBytes,
+      totalPages: rec.totalPages || 0,
+      sourceFileId: fileId,
+      createdAt: Date.now(),
+    });
+    return PREVIEW_ID;
+  }
+
+  async function getPreviewPdfArrayBuffer() {
+    return getPdfArrayBuffer(PREVIEW_ID);
   }
 
   async function getPdfBase64(fileId) {
@@ -89,5 +119,10 @@ const FileStore = (() => {
     return btoa(binary);
   }
 
-  return { put, get, remove, saveUploadedFile, getPdfArrayBuffer, getPdfBase64, makeId };
+  return {
+    put, get, remove, saveUploadedFile, getPdfArrayBuffer, getPdfBase64, makeId,
+    syncPreviewFromFile, getPreviewPdfArrayBuffer, PREVIEW_ID,
+  };
 })();
+// const 不会自动挂到 window，放映页通过 window.FileStore 访问需要显式赋值
+window.FileStore = FileStore;

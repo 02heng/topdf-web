@@ -103,6 +103,11 @@
   AppState.on('change:currentPage', () => {
     Sidebar.refreshList();
     Sidebar.deselectMarker();
+    window.refreshPreview?.();
+  });
+
+  AppState.on('annotations:changed', () => {
+    window.refreshPreview?.();
   });
 
   AppState.on('change:currentFileIndex', () => {

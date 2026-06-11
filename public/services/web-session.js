@@ -3,6 +3,7 @@
  */
 const WebSession = (() => {
   const STORAGE_KEY = 'topdf_web_session_v1';
+  const PREVIEW_BRIDGE_KEY = 'topdf_preview_session';
 
   const session = {
     files: [],
@@ -79,6 +80,52 @@ const WebSession = (() => {
     };
   }
 
+  function hasPreviewBridge() {
+    try {
+      return !!localStorage.getItem(PREVIEW_BRIDGE_KEY);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function pushPreviewLiveState() {
+    if (!hasPreviewBridge()) return;
+    const f = currentFile();
+    if (!f) return;
+    try {
+      const fk = fileKey(f);
+      if (typeof AppState !== 'undefined') {
+        session.currentPage = AppState.get('currentPage') ?? session.currentPage;
+        session.annotationsByFile[fk] = AppState.state.annotationsByPage || {};
+        session.inkByFile[fk] = AppState.state.inkByPage || {};
+      }
+      let existing = {};
+      try {
+        existing = JSON.parse(localStorage.getItem(PREVIEW_BRIDGE_KEY) || '{}');
+      } catch (_) {}
+      const bridge = {
+        ...existing,
+        state: buildState(),
+        pdfFileId: f.id,
+        previewReady: true,
+        inkByFile: { [fk]: session.inkByFile[fk] || {} },
+        savedAt: Date.now(),
+      };
+      localStorage.setItem(PREVIEW_BRIDGE_KEY, JSON.stringify(bridge));
+      try {
+        const channel = new BroadcastChannel('topdf-preview-sync');
+        channel.postMessage({ type: 'refresh' });
+        channel.close();
+      } catch (_) {}
+    } catch (e) {
+      console.warn('[WebSession] pushPreviewLiveState failed', e);
+    }
+  }
+
+  function refreshPreview() {
+    pushPreviewLiveState();
+  }
+
   function persist() {
     try {
       const payload = {
@@ -91,6 +138,7 @@ const WebSession = (() => {
         inkByFile: session.inkByFile,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      pushPreviewLiveState();
     } catch (e) {
       console.warn('[WebSession] persist failed', e);
     }
@@ -187,20 +235,36 @@ const WebSession = (() => {
     return project;
   }
 
-  function savePreviewBridge() {
+  const PREVIEW_SLOT_ID = '__topdf_preview__';
+
+  async function savePreviewBridge() {
     const f = currentFile();
-    if (!f) return Promise.resolve(false);
-    return FileStore.getPdfBase64(f.id).then((pdfBase64) => {
-      const bridge = {
-        state: buildState(),
-        pdfBase64,
-        inkByFile: session.inkByFile,
-        annotationsByFile: session.annotationsByFile,
-        savedAt: Date.now(),
-      };
-      localStorage.setItem('topdf_preview_session', JSON.stringify(bridge));
-      return true;
-    });
+    if (!f) return false;
+    const rec = await FileStore.get(f.id);
+    if (!rec?.pdfBytes) throw new Error('PDF 不可用，请重新导入');
+    if (typeof FileStore.syncPreviewFromFile === 'function') {
+      await FileStore.syncPreviewFromFile(f.id);
+    } else {
+      await FileStore.put({
+        id: PREVIEW_SLOT_ID,
+        name: rec.name || 'preview',
+        mime: 'application/pdf',
+        pdfBytes: rec.pdfBytes,
+        totalPages: rec.totalPages || 0,
+        sourceFileId: f.id,
+        createdAt: Date.now(),
+      });
+    }
+    const fk = fileKey(f);
+    const bridge = {
+      state: buildState(),
+      pdfFileId: f.id,
+      previewReady: true,
+      inkByFile: { [fk]: session.inkByFile[fk] || {} },
+      savedAt: Date.now(),
+    };
+    localStorage.setItem(PREVIEW_BRIDGE_KEY, JSON.stringify(bridge));
+    return true;
   }
 
   return {
@@ -219,6 +283,14 @@ const WebSession = (() => {
     setInkForCurrentFile,
     exportProjectBlob,
     importProjectBlob,
-    savePreviewBridge,
+    savePreviewBridge, pushPreviewLiveState, refreshPreview,
   };
 })();
+
+window.refreshPreview = () => {
+  if (window.electronAPI?.refreshPreview) {
+    window.electronAPI.refreshPreview();
+    return;
+  }
+  WebSession.refreshPreview();
+};

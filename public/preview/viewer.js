@@ -1482,3 +1482,9 @@ initToolsUi();
 updateZoomLabel();
 refresh(true);
 setInterval(() => refresh(false), 1000);
+try {
+  const previewSync = new BroadcastChannel('topdf-preview-sync');
+  previewSync.onmessage = (e) => {
+    if (e.data?.type === 'refresh') refresh(false);
+  };
+} catch (_) {}
