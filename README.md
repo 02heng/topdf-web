@@ -72,7 +72,8 @@ git push -u origin main
 2. 选择 GitHub 仓库 `topdf-web`
 3. Framework Preset: **Other**
 4. Root Directory: `.`（默认）
-5. 在 **Environment Variables** 添加 LLM API Key（见上文）
+5. **Build Command / Output Directory 均留空**（不要填 `public`，否则 `api/` 函数会失效）
+6. 在 **Environment Variables** 添加 LLM API Key（见上文）
 6. 点击 **Deploy**
 
 ### 3. 部署后验证
