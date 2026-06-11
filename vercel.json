@@ -3,8 +3,9 @@
   "redirects": [
     { "source": "/", "destination": "/index.html", "permanent": false }
   ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/index" }
   ],
   "headers": [
     {
