@@ -2,9 +2,15 @@
 from __future__ import annotations
 
 import json
+import sys
 import traceback
 from http.server import BaseHTTPRequestHandler
+from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+_API_DIR = Path(__file__).resolve().parent
+if str(_API_DIR) not in sys.path:
+    sys.path.insert(0, str(_API_DIR))
 
 from web_handlers import (
     health,
