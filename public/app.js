@@ -161,7 +161,14 @@
     StatusBar.setMessage('请通过 http://127.0.0.1:3000 访问（直接打开 HTML 无法导入 PDF）');
   } else {
     const health = await ApiClient.checkHealth().catch(() => null);
-    StatusBar.setMessage(health?.ok ? '就绪 · 后端已连接' : '就绪 · 后端未连接，导入 PDF 需先启动 npm run dev');
+    const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+    if (health?.ok) {
+      StatusBar.setMessage('就绪 · 后端已连接');
+    } else if (isLocal) {
+      StatusBar.setMessage('就绪 · 后端未连接，请先运行 npm run dev 并访问 http://127.0.0.1:3000');
+    } else {
+      StatusBar.setMessage('就绪 · 后端 API 不可用，请稍后刷新或联系管理员');
+    }
   }
   console.log('[bootstrap] Web 前端初始化完成');
 })();
