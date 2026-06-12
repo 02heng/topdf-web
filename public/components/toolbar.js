@@ -303,6 +303,22 @@ const Toolbar = (() => {
       StatusBar.setMessage('请先导入 PDF 文件');
       return;
     }
+
+    const useElectron = !!window.electronAPI?.openPreview;
+    // 必须在首个 await 之前打开窗口，否则浏览器会静默拦截弹窗
+    let previewWin = null;
+    if (!useElectron) {
+      previewWin = window.open('about:blank', '_blank', 'noopener,noreferrer');
+      if (!previewWin) {
+        StatusBar.setMessage('弹窗被浏览器拦截，请在地址栏允许本站弹出窗口后重试');
+        return;
+      }
+      try {
+        previewWin.document.title = 'TO PDF · 批注预览';
+        previewWin.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px">正在准备放映…</p>';
+      } catch (_) {}
+    }
+
     try {
       await Sidebar.flushPendingSave();
       const idx = AppState.get('currentFileIndex');
@@ -317,7 +333,7 @@ const Toolbar = (() => {
       } else {
         await ApiClient.navigatePage(page);
       }
-      if (window.electronAPI?.openPreview) {
+      if (useElectron) {
         window.electronAPI.openPreview();
       } else {
         const f = WebSession.currentFile();
@@ -325,10 +341,15 @@ const Toolbar = (() => {
         await WebSession.savePreviewBridge();
         window._topdfPreviewPdfId = f.id;
         const q = new URLSearchParams({ fileId: f.id, t: String(Date.now()) });
-        window.open(`/preview/?${q}`, '_blank', 'noopener');
+        const url = `${location.origin}/preview/?${q}`;
+        if (previewWin.closed) {
+          throw new Error('放映窗口已关闭，请重新点击「放映」');
+        }
+        previewWin.location.replace(url);
       }
       StatusBar.setMessage('上课模式已打开');
     } catch (e) {
+      if (previewWin && !previewWin.closed) previewWin.close();
       StatusBar.setMessage(`打开上课模式失败: ${e.message}`);
     }
   }
