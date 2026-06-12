@@ -59,10 +59,8 @@ const Toolbar = (() => {
       StatusBar.setMessage(`导入成功：${files.length} 个文件`);
     } catch (e) {
       const msg = String(e.message || e);
-      const isLocal = location.hostname === '127.0.0.1' || location.hostname === 'localhost';
-      const hint = (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('无法连接'))
-        && isLocal
-        ? '（请确认已运行 npm run dev 并访问 http://127.0.0.1:3000）'
+      const hint = msg.includes('Failed to fetch') || msg.includes('NetworkError')
+        ? '（请确认已通过 http://127.0.0.1:3000 访问，且开发服务器正在运行）'
         : '';
       StatusBar.setMessage(`导入失败：${msg}${hint}`);
       console.error('[import]', e);
