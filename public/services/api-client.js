@@ -3,6 +3,69 @@
  */
 const ApiClient = (() => {
   const baseUrl = '';
+  const SERVER_UPLOAD_MAX = 4 * 1024 * 1024; // Vercel 请求体约 4.5MB，留余量
+
+  function isLocalDev() {
+    return location.hostname === '127.0.0.1' || location.hostname === 'localhost';
+  }
+
+  async function loadPdfjs() {
+    if (window.pdfjsLib) return window.pdfjsLib;
+    const base = '/vendor/pdfjs';
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = `${base}/pdf.min.js`;
+      script.onload = () => {
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = `${base}/pdf.worker.min.js`;
+        resolve(window.pdfjsLib);
+      };
+      script.onerror = () => reject(new Error('PDF.js 加载失败'));
+      document.head.appendChild(script);
+    });
+  }
+
+  async function countPdfPages(pdfBytes) {
+    const pdfjsLib = await loadPdfjs();
+    const doc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+    const total = doc.numPages;
+    doc.destroy();
+    return total;
+  }
+
+  async function importPdfLocally(file) {
+    const pdfBytes = await file.arrayBuffer();
+    const totalPages = await countPdfPages(pdfBytes);
+    const rec = await FileStore.saveUploadedFile(file, pdfBytes, { totalPages });
+    WebSession.addFile({
+      id: rec.id,
+      name: rec.name,
+      totalPages: rec.totalPages,
+    });
+    return rec;
+  }
+
+  function ingestServerUploadItem(item) {
+    const binary = atob(item.pdf_base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const rec = {
+      id: item.id,
+      name: item.name,
+      mime: item.mime,
+      originalBytes: null,
+      pdfBytes: bytes.buffer,
+      totalPages: item.total_pages,
+      createdAt: Date.now(),
+    };
+    return FileStore.put(rec).then(() => {
+      WebSession.addFile({
+        id: rec.id,
+        name: rec.name,
+        totalPages: rec.totalPages,
+      });
+      return rec;
+    });
+  }
 
   async function fetchJSON(path, options = {}) {
     const res = await fetch(`${baseUrl}${path}`, {
@@ -66,13 +129,23 @@ const ApiClient = (() => {
   }
 
   async function uploadFiles(fileList) {
+    for (const file of fileList) {
+      if (file.size > SERVER_UPLOAD_MAX) {
+        throw new Error(
+          `${file.name} 超过 4MB，Vercel 线上无法上传大文件。请先在本地转为 PDF 后再导入，或使用本地开发环境。`,
+        );
+      }
+    }
     const form = new FormData();
     Array.from(fileList).forEach((file) => form.append('files', file));
     let res;
     try {
       res = await fetch('/api/upload', { method: 'POST', body: form });
-    } catch (_) {
-      throw new Error('无法连接后端，请确认已运行 npm run dev 并通过 http://127.0.0.1:3000 访问');
+    } catch (err) {
+      if (isLocalDev()) {
+        throw new Error('无法连接后端，请先运行 npm run dev 并访问 http://127.0.0.1:3000');
+      }
+      throw new Error('无法连接后端 API，请检查网络后重试');
     }
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -82,37 +155,40 @@ const ApiClient = (() => {
   }
 
   async function importFiles(files) {
-    if (files?.length && files[0] instanceof File) {
-      const result = await uploadFiles(files);
-      for (const item of result.files || []) {
-        const rec = await FileStore.put({
-          id: item.id,
-          name: item.name,
-          mime: item.mime,
-          originalBytes: null,
-          pdfBytes: (() => {
-            const binary = atob(item.pdf_base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return bytes.buffer;
-          })(),
-          totalPages: item.total_pages,
-          createdAt: Date.now(),
-        });
-        WebSession.addFile({
-          id: rec.id,
-          name: rec.name,
-          totalPages: rec.totalPages,
-        });
-      }
-      if (WebSession.session.currentFileIndex >= 0) {
-        const f = WebSession.currentFile();
-        WebSession.session.totalPages = f?.totalPages || 0;
-        WebSession.persist();
-      }
-      return { ok: true, added: result.files?.length || 0, files: WebSession.session.files.map((x) => x.name) };
+    if (!files?.length || !(files[0] instanceof File)) {
+      throw new Error('请使用文件选择器导入');
     }
-    throw new Error('请使用文件选择器导入');
+
+    const pdfFiles = [];
+    const serverFiles = [];
+    for (const file of files) {
+      const lower = file.name.toLowerCase();
+      if (lower.endsWith('.pdf')) pdfFiles.push(file);
+      else if (lower.endsWith('.ppt') || lower.endsWith('.pptx')) serverFiles.push(file);
+      else throw new Error(`不支持的文件类型: ${file.name}`);
+    }
+
+    for (const file of pdfFiles) {
+      await importPdfLocally(file);
+    }
+
+    if (serverFiles.length) {
+      const result = await uploadFiles(serverFiles);
+      for (const item of result.files || []) {
+        await ingestServerUploadItem(item);
+      }
+    }
+
+    if (WebSession.session.currentFileIndex >= 0) {
+      const f = WebSession.currentFile();
+      WebSession.session.totalPages = f?.totalPages || 0;
+      WebSession.persist();
+    }
+    return {
+      ok: true,
+      added: pdfFiles.length + serverFiles.length,
+      files: WebSession.session.files.map((x) => x.name),
+    };
   }
 
   async function annotateSingle(pageNum) {
