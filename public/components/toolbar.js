@@ -303,18 +303,33 @@ const Toolbar = (() => {
     }
 
     const useElectron = !!window.electronAPI?.openPreview;
-    // 必须在首个 await 之前打开窗口，否则浏览器会静默拦截弹窗
+    // 必须在首个 await 之前打开窗口；不可加 noopener（Edge/Chrome 会返回 null 但窗口已开）
     let previewWin = null;
     if (!useElectron) {
-      previewWin = window.open('about:blank', '_blank', 'noopener,noreferrer');
-      if (!previewWin) {
-        StatusBar.setMessage('弹窗被浏览器拦截，请在地址栏允许本站弹出窗口后重试');
-        return;
+      previewWin = window.open('about:blank', '_blank');
+      if (previewWin) {
+        try {
+          previewWin.document.title = 'TO PDF · 批注预览';
+          previewWin.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px">正在准备放映…</p>';
+        } catch (_) {}
       }
-      try {
-        previewWin.document.title = 'TO PDF · 批注预览';
-        previewWin.document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px">正在准备放映…</p>';
-      } catch (_) {}
+    }
+
+    function openPreviewUrl(url) {
+      if (previewWin && !previewWin.closed) {
+        previewWin.location.replace(url);
+        return true;
+      }
+      const opened = window.open(url, '_blank');
+      if (opened) return true;
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      return true;
     }
 
     try {
@@ -340,10 +355,10 @@ const Toolbar = (() => {
         window._topdfPreviewPdfId = f.id;
         const q = new URLSearchParams({ fileId: f.id, t: String(Date.now()) });
         const url = `${location.origin}/preview/?${q}`;
-        if (previewWin.closed) {
+        if (previewWin && previewWin.closed) {
           throw new Error('放映窗口已关闭，请重新点击「放映」');
         }
-        previewWin.location.replace(url);
+        openPreviewUrl(url);
       }
       StatusBar.setMessage('上课模式已打开');
     } catch (e) {
